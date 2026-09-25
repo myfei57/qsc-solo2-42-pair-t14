@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Unit overview</title></head>
+<body>
+<h1>Unit overview</h1>
+<nav><a href="overview.html">overview</a> <a href="operations.html">operations</a> <a href="audit.html">audit</a></nav>
+<div id="state"></div>
+<script>
+fetch('/api/state').then(function (r) { return r.json(); }).then(function (data) {
+  var html = '';
+  data.units.forEach(function (u) {
+    html += '<div>' + u.id + ' ' + u.name + ' state=' + u.state +
+      ' head=' + u.head + ' cooling=' + u.cooling_open +
+      ' sync=' + u.sync_state + ' limit=' + u.output_limit + '</div>';
+  });
+  document.getElementById('state').innerHTML = html;
+});
+</script>
+</body>
+</html>

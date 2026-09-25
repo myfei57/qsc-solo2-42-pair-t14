@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Operations</title></head>
+<body>
+<h1>Operations</h1>
+<nav><a href="overview.html">overview</a> <a href="operations.html">operations</a> <a href="audit.html">audit</a></nav>
+<button onclick="op('/api/guide/open')">guide open</button>
+<button onclick="op('/api/cooling/open')">cooling open</button>
+<button onclick="op('/api/runner/start')">runner start</button>
+<button onclick="op('/api/gov/sync')">sync confirm</button>
+<button onclick="op('/api/exc/apply')">excitation apply</button>
+<button onclick="op('/api/brake/engage')">brake engage</button>
+<div id="result"></div>
+<script>
+function op(path) {
+  fetch(path, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({unit_id: 'u1'})
+  }).then(function (r) { return r.json(); }).then(function (data) {
+    document.getElementById('result').textContent = JSON.stringify(data);
+  });
+}
+</script>
+</body>
+</html>

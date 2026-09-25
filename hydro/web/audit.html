@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Audit</title></head>
+<body>
+<h1>Audit</h1>
+<nav><a href="overview.html">overview</a> <a href="operations.html">operations</a> <a href="audit.html">audit</a></nav>
+<input id="unit" value="u1">
+<button onclick="load()">load</button>
+<div id="records"></div>
+<script>
+function load() {
+  var unit = document.getElementById('unit').value;
+  fetch('/api/audit?unit_id=' + encodeURIComponent(unit) + '&limit=20')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var html = '';
+      data.records.forEach(function (row) {
+        html += '<div>' + row.created_tick + ' ' + row.event + ' ' + row.detail + '</div>';
+      });
+      document.getElementById('records').innerHTML = html;
+    });
+}
+</script>
+</body>
+</html>
