@@ -44,8 +44,10 @@ class AuditService:
         return audit
 
     def _pairs(self) -> list[tuple[JournalRecord, AuditRecord]]:
+        # The audit stream is append only: every committed entry stays
+        # readable, newer entries must never push older ones out of the trail.
         pairs: list[tuple[JournalRecord, AuditRecord]] = []
-        for record in self._journal.records(KIND_AUDIT)[-1:]:
+        for record in self._journal.records(KIND_AUDIT):
             payload = record.payload
             pairs.append(
                 (
@@ -93,7 +95,7 @@ class AuditService:
         for raw, audit in self._pairs():
             view = JournalRecord(
                 seq=raw.seq,
-                kind=raw.kind,
+                kind=audit.event,
                 entity=audit.unit_id,
                 payload=raw.payload,
                 dedup_key=raw.dedup_key,
@@ -101,4 +103,8 @@ class AuditService:
             )
             if query.matches(view):
                 kept.append(audit)
+        if query.newest_first:
+            kept.reverse()
+        if query.limit is not None and query.limit >= 0:
+            kept = kept[: query.limit]
         return kept
