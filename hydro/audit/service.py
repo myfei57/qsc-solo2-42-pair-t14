@@ -45,7 +45,7 @@ class AuditService:
 
     def _pairs(self) -> list[tuple[JournalRecord, AuditRecord]]:
         pairs: list[tuple[JournalRecord, AuditRecord]] = []
-        for record in self._journal.records(KIND_AUDIT)[-1:]:
+        for record in self._journal.records(KIND_AUDIT):
             payload = record.payload
             pairs.append(
                 (
@@ -89,16 +89,17 @@ class AuditService:
     def query(self, query: RecordQuery) -> list[AuditRecord]:
         """Apply a record query, matching the audit event as the record kind."""
 
-        kept: list[AuditRecord] = []
-        for raw, audit in self._pairs():
-            view = JournalRecord(
+        pairs = self._pairs()
+        by_seq = {raw.seq: audit for raw, audit in pairs}
+        views = [
+            JournalRecord(
                 seq=raw.seq,
-                kind=raw.kind,
+                kind=audit.event,
                 entity=audit.unit_id,
                 payload=raw.payload,
                 dedup_key=raw.dedup_key,
-                created_tick=raw.created_tick,
+                created_tick=audit.created_tick,
             )
-            if query.matches(view):
-                kept.append(audit)
-        return kept
+            for raw, audit in pairs
+        ]
+        return [by_seq[view.seq] for view in query.apply(views)]
